@@ -38,4 +38,4 @@ exports.simularJogo = (req, res) => {
         .catch(error => {
             res.status(500).json({ message: 'Erro ao simular o jogo', error})
         })
-}
+};

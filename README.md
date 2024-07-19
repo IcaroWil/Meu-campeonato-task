@@ -1,6 +1,6 @@
 # Placar do Jogo
 
-## Sobre o Projeto
+## Descrição
 
 Bem-vindo ao projeto "Placar do Jogo"! Este é um teste técnico para back-end, desenvolvido para simular campeonatos de futebol. A aplicação é feita utilizando Node.js e MySQL, e tem como objetivo principal oferecer uma solução simples e eficaz para gerenciar torneios eliminatórios.
 

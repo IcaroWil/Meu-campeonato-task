@@ -24,7 +24,7 @@ Antes de começar, você precisará ter o Docker e o Docker Compose instalados e
 1. **Clone o repositório**:
 
     ```bash
-    git clone https://github.com/IcaroWil/Task-Irroba
+    git clone https://github.com/IcaroWil/Meu-campeonato-task.git
     cd Task-Irroba
     ```
 

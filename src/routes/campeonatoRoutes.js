@@ -8,5 +8,6 @@ router.post('/simular-jogo', campeonatoController.simularJogo)
 router.get('/verificar-vencedores/:fase', campeonatoController.verificarVencedores)
 router.get('/chaveamento-semis', campeonatoController.chaveamentoSemis)
 router.get('/chaveamento-final-terceiro', campeonatoController.chaveamentoFinalTerceiro)
+router.get('/campeonatos-anteriores', campeonatoController.recuperarCampeonatosAnteriores)
 
 module.exports = router

@@ -166,3 +166,19 @@ exports.chaveamentoFinalTerceiro = async (req, res) => {
         res.status(500).json({ message: 'Erro ao chavear a final e terceiro lugar' })
     }
 }
+
+exports.recuperarCampeonatosAnteriores = async (req, res) => {
+    try {
+        const db = await createConnection()
+        const [jogos] = await db.query('SELECT * FROM jogos')
+
+        if (jogos.length === 0) {
+            return res.status(404).json({ message: 'Nenhum campeonato encontrado' })
+        }
+
+        res.status(200).json({ jogos })
+    } catch (err) {
+        console.error('Erro ao recuperar campeonatos anteriores:', err)
+        res.status(500).json({ message: 'Erro ao recuperar campeonatos anteriores' })
+    }
+}

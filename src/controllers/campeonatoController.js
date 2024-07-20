@@ -135,7 +135,7 @@ exports.chaveamentoSemis = async (req, res) => {
     }
 }
 
-// Função para chaveamento da final e terceiro lugar
+
 exports.chaveamentoFinalTerceiro = async (req, res) => {
     try {
         const db = await createConnection()

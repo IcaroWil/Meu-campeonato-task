@@ -1,4 +1,4 @@
-# Placar do Jogo
+# Meu Campeonato
 
 ## Descrição
 
@@ -23,8 +23,8 @@ Antes de começar, você precisará ter o Docker e o Docker Compose instalados e
 1. **Clone o repositório**:
 
     ```bash
-    git clone https://github.com/IcaroWil/Task-Irroba
-    cd Task-Irroba
+    git clone https://github.com/IcaroWil/Meu-campeonato-task.git
+    cd Meu-campeonato-task
     ```
 
 2. **Instale as dependências do projeto**:
@@ -53,7 +53,7 @@ O banco de dados será inicializado automaticamente com o script `init.sql`, cri
 
 Este projeto foi desenvolvido com o objetivo de criar uma aplicação funcional e bem estruturada para simular campeonatos de futebol. Agradecemos pelo interesse e esperamos que você goste de explorar e utilizar o "Placar do Jogo".
 
-Para mais detalhes, visite o repositório no GitHub: [Task-Irroba](https://github.com/IcaroWil/Task-Irroba).
+Para mais detalhes, visite o repositório no GitHub: [Meu Campeonato Task](https://github.com/IcaroWil/Meu-campeonato-task).
 
 ---
 

@@ -25,7 +25,7 @@ Antes de começar, você precisará ter o Docker e o Docker Compose instalados e
 
     ```bash
     git clone https://github.com/IcaroWil/Meu-campeonato-task.git
-    cd Meu-campeonato-task.git
+    cd Meu-campeonato-task
     ```
 
 2. **Configure o ambiente e inicialize os containers Docker**:

@@ -17,7 +17,7 @@ async function inserirTimes(times) {
 async function chaveamentoCampeonato() {
     const db = await createConnection()
     const [times] = await db.query('SELECT * FROM times')
-    
+
     if (times.length !== 8) {
         throw new Error('O campeonato deve ter exatamente 8 times')
     }
@@ -38,14 +38,39 @@ async function chaveamentoCampeonato() {
 }
 
 async function simularJogo(time1_id, time2_id, fase) {
+    const db = await createConnection()
+
+    const [time1] = await db.query('SELECT * FROM times WHERE id = ?', [time1_id])
+    const [time2] = await db.query('SELECT * FROM times WHERE id = ?', [time2_id])
+
     const gol_time1 = Math.floor(Math.random() * 8)
     const gol_time2 = Math.floor(Math.random() * 8)
 
+    let pontuacao_time1 = gol_time1 - gol_time2
+    let pontuacao_time2 = gol_time2 - gol_time1
+
+    if (gol_time1 === gol_time2) {
+        pontuacao_time1 += time1[0].pontuacao
+        pontuacao_time2 += time2[0].pontuacao
+
+        if (pontuacao_time1 === pontuacao_time2) {
+            if (time1[0].id < time2[0].id) {
+                pontuacao_time1++
+            } else {
+                pontuacao_time2++
+            }
+        }
+    }
+
+    const vencedor = pontuacao_time1 > pontuacao_time2 ? time1_id : time2_id
+
     const sql = 'INSERT INTO jogos (time1_id, time2_id, gol_time1, gol_time2, fase) VALUES (?, ?, ?, ?, ?)'
-    const db = await createConnection()
     const [result] = await db.query(sql, [time1_id, time2_id, gol_time1, gol_time2, fase])
 
-    return { message: 'Jogo simulado com sucesso!', gol_time1, gol_time2 }
+    await db.query('UPDATE times SET pontuacao = pontuacao + ? WHERE id = ?', [pontuacao_time1, time1_id])
+    await db.query('UPDATE times SET pontuacao = pontuacao + ? WHERE id = ?', [pontuacao_time2, time2_id])
+
+    return { message: 'Jogo simulado com sucesso!', gol_time1, gol_time2, vencedor }
 }
 
 async function verificarVencedores(fase) {
@@ -56,70 +81,127 @@ async function verificarVencedores(fase) {
         throw new Error('Nenhum jogo encontrado para esta fase')
     }
 
-    const vencedores = jogos.map(jogo => {
-        return jogo.gol_time1 > jogo.gol_time2 ? jogo.time1_id : jogo.time2_id
-    })
+    const vencedores = await Promise.all(jogos.map(async jogo => {
+        if (jogo.gol_time1 > jogo.gol_time2) {
+            return jogo.time1_id
+        } else if (jogo.gol_time1 < jogo.gol_time2) {
+            return jogo.time2_id
+        } else {
+            const [time1] = await db.query('SELECT * FROM times WHERE id = ?', [jogo.time1_id])
+            const [time2] = await db.query('SELECT * FROM times WHERE id = ?', [jogo.time2_id])
 
-    return vencedores
+            if (time1[0].pontuacao > time2[0].pontuacao) {
+                return time1[0].id
+            } else if (time1[0].pontuacao < time2[0].pontuacao) {
+                return time2[0].id
+            } else {
+                return time1[0].id < time2[0].id ? time1[0].id : time2[0].id
+            }
+        }
+    }))
+
+    const uniqueVencedores = [...new Set(vencedores)]
+
+    if (fase === 'semi' && uniqueVencedores.length !== 2) {
+        throw new Error('As semifinais devem ter exatamente 2 vencedores')
+    }
+
+    return uniqueVencedores
 }
 
 async function chaveamentoSemis() {
     const db = await createConnection()
-    const [quartas] = await db.query('SELECT * FROM jogos WHERE fase = ?', ['quartas'])
+    const vencedores = await verificarVencedores('quartas')
 
-    if (quartas.length !== 4) {
-        throw new Error('As quartas de final devem ter exatamente 4 jogos')
+    if (vencedores.length !== 4) {
+        throw new Error('As quartas de final devem ter exatamente 4 vencedores')
     }
 
-    const vencedores = quartas.map(jogo => {
-        return jogo.gol_time1 > jogo.gol_time2 ? jogo.time1_id : jogo.time2_id
-    })
+    const shuffle = array => array.sort(() => Math.random() - 0.5)
+    const timesRestantes = shuffle(vencedores.slice())
 
-    let jogos = []
-    while (vencedores.length > 1) {
-        const time1 = vencedores.pop()
-        const time2 = vencedores.pop()
-        jogos.push({ time1_id: time1, time2_id: time2, fase: 'semifinais' })
+    const semiJogos = []
+    while (timesRestantes.length > 1) {
+        const time1 = timesRestantes.pop()
+        const time2 = timesRestantes.pop()
+        semiJogos.push({ time1_id: time1, time2_id: time2, fase: 'semi' })
     }
 
-    return jogos
+    await Promise.all(semiJogos.map(async jogo => {
+        await db.query('INSERT INTO jogos (time1_id, time2_id, fase) VALUES (?, ?, ?)', [jogo.time1_id, jogo.time2_id, 'semi'])
+    }))
+
+    return semiJogos
 }
 
 async function chaveamentoFinalTerceiro() {
     const db = await createConnection()
-    const [semis] = await db.query('SELECT * FROM jogos WHERE fase = ?', ['semifinais'])
+    const vencedores = await verificarVencedores('semi')
 
-    if (semis.length !== 2) {
-        throw new Error('As semifinais devem ter exatamente 2 jogos')
+    if (vencedores.length !== 2) {
+        throw new Error('As semifinais devem ter exatamente 2 vencedores')
     }
 
-    const vencedores = []
-    const perdedores = []
+    const [semis] = await db.query('SELECT * FROM jogos WHERE fase = "semi" AND gol_time1 IS NOT NULL AND gol_time2 IS NOT NULL')
+
+    
+    const jogosUnicos = {}
     semis.forEach(jogo => {
-        if (jogo.gol_time1 > jogo.gol_time2) {
-            vencedores.push(jogo.time1_id)
-            perdedores.push(jogo.time2_id)
-        } else {
-            vencedores.push(jogo.time2_id)
-            perdedores.push(jogo.time1_id)
+        const chave = `${jogo.time1_id}-${jogo.time2_id}`
+        if (!jogosUnicos[chave]) {
+            jogosUnicos[chave] = jogo
         }
     })
 
-    const final = { time1_id: vencedores[0], time2_id: vencedores[1], fase: 'final' }
-    const terceiro_lugar = { time1_id: perdedores[0], time2_id: perdedores[1], fase: 'terceiro_lugar' }
+    const jogosValidos = Object.values(jogosUnicos)
 
-    return { final, terceiro_lugar }
+    const perdedores = jogosValidos.map(jogo => {
+        if (jogo.gol_time1 > jogo.gol_time2) {
+            return jogo.time2_id
+        } else {
+            return jogo.time1_id
+        }
+    })
+
+    console.log('Jogos válidos:', jogosValidos)
+    console.log('Perdedores:', perdedores)
+
+    if (perdedores.length !== 2) {
+        throw new Error('As semifinais devem ter exatamente 2 perdedores')
+    }
+
+    const jogos = [
+        { time1_id: vencedores[0], time2_id: vencedores[1], fase: 'final' },
+        { time1_id: perdedores[0], time2_id: perdedores[1], fase: 'terceiro' }
+    ]
+
+    await Promise.all(jogos.map(async jogo => {
+        await db.query('INSERT INTO jogos (time1_id, time2_id, fase) VALUES (?, ?, ?)', [jogo.time1_id, jogo.time2_id, jogo.fase])
+    }))
+
+    return jogos
 }
 
 async function recuperarCampeonatosAnteriores() {
     const db = await createConnection()
-    const [jogos] = await db.query('SELECT * FROM jogos')
+    const [jogos] = await db.query('SELECT * FROM jogos WHERE gol_time1 IS NOT NULL AND gol_time2 IS NOT NULL')
 
     if (jogos.length === 0) {
-        throw new Error('Nenhum campeonato encontrado')
+        throw new Error('Nenhum jogo encontrado')
     }
 
-    return jogos
+    const campeonatosAnteriores = {
+        quartas: [],
+        semi: [],
+        final: [],
+        terceiro: []
+    }
+
+    jogos.forEach(jogo => {
+        campeonatosAnteriores[jogo.fase].push(jogo)
+    })
+
+    return campeonatosAnteriores
 }
 
 module.exports = {

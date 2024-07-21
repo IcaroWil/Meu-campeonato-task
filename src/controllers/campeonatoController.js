@@ -21,7 +21,7 @@ exports.chaveamentoCampeonato = async (req, res) => {
         const jogos = await campeonatoService.chaveamentoCampeonato()
         res.status(200).json({ jogos })
     } catch (err) {
-        console.error(err)
+        console.error('Erro ao chavear o campeonato:', err)
         res.status(500).json({ message: 'Erro ao chavear o campeonato' })
     }
 }
@@ -33,7 +33,7 @@ exports.simularJogo = async (req, res) => {
         const result = await campeonatoService.simularJogo(time1_id, time2_id, fase)
         res.status(201).json(result)
     } catch (err) {
-        console.error(err)
+        console.error('Erro ao simular jogo:', err)
         res.status(500).json({ message: 'Erro ao simular jogo' })
     }
 }
@@ -45,7 +45,7 @@ exports.verificarVencedores = async (req, res) => {
         const vencedores = await campeonatoService.verificarVencedores(fase)
         res.status(200).json({ vencedores })
     } catch (err) {
-        console.error(err)
+        console.error('Erro ao verificar vencedores:', err)
         res.status(500).json({ message: 'Erro ao verificar vencedores' })
     }
 }
@@ -55,25 +55,25 @@ exports.chaveamentoSemis = async (req, res) => {
         const jogos = await campeonatoService.chaveamentoSemis()
         res.status(200).json({ jogos })
     } catch (err) {
-        console.error(err)
+        console.error('Erro ao chavear as semifinais:', err)
         res.status(500).json({ message: 'Erro ao chavear as semifinais' })
     }
 }
 
 exports.chaveamentoFinalTerceiro = async (req, res) => {
     try {
-        const { final, terceiro_lugar } = await campeonatoService.chaveamentoFinalTerceiro()
-        res.status(200).json({ final, terceiro_lugar })
+        const resultado = await campeonatoService.chaveamentoFinalTerceiro()
+        res.json(resultado)
     } catch (err) {
-        console.error(err)
+        console.error('Erro ao chavear a final e terceiro lugar:', err)
         res.status(500).json({ message: 'Erro ao chavear a final e terceiro lugar' })
     }
 }
 
 exports.recuperarCampeonatosAnteriores = async (req, res) => {
     try {
-        const jogos = await campeonatoService.recuperarCampeonatosAnteriores()
-        res.status(200).json({ jogos })
+        const campeonatosAnteriores = await campeonatoService.recuperarCampeonatosAnteriores()
+        res.status(200).json(campeonatosAnteriores)
     } catch (err) {
         console.error('Erro ao recuperar campeonatos anteriores:', err)
         res.status(500).json({ message: 'Erro ao recuperar campeonatos anteriores' })

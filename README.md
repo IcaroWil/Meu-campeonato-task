@@ -4,6 +4,10 @@
 
 Projeto "Meu campeonato"! Este é um teste técnico para back-end, desenvolvido para simular campeonatos de futebol. A aplicação é feita utilizando Node.js e MySQL, e tem como objetivo principal oferecer uma solução simples e eficaz para gerenciar torneios eliminatórios.
 
+## URLs Importantes
+
+- **Documentação da API no Postman:** [Documentação Postman](https://documenter.getpostman.com/view/34454830/2sA3kVjM6G)
+
 ## Tecnologias Utilizadas
 
 - **Node.js**: Plataforma de desenvolvimento back-end.

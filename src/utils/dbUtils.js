@@ -1,4 +1,4 @@
-const createConnection = require('../models/db')
+const createConnection = require('../models/database')
 
 async function waitForDatabase() {
     while (true) {

@@ -67,7 +67,7 @@ Antes de começar, você precisará ter o Docker e o Docker Compose instalados e
 
 - **Rota:** `GET /verificar-vencedores/:fase`
 - **Descrição:** Verifica os vencedores de uma fase específica.
-- **Parâmetro:** `fase` - A fase do campeonato (quartas, semifinais, final, terceiro_lugar).
+- **Parâmetro:** `fase` - A fase do campeonato (quartas, semi, final, terceiro).
 
 ### Chaveamento das Semifinais
 
